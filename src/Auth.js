@@ -4,10 +4,10 @@ class Auth {
   constructor() {
     this.auth0 = new auth0.WebAuth({
       // the following three lines MUST be updated
-      domain: process.env.DOMAIN,
-      audience: process.env.AUDIENCE,
-      clientID: process.env.CLIENT_ID,
-      redirectUri: process.env.REDIRECT_URI,
+      domain: process.env.REACT_APP_DOMAIN,
+      audience: process.env.REACT_APP_AUDIENCE,
+      clientID: process.env.REACT_APP_CLIENT_ID,
+      redirectUri: process.env.REACT_APP_REDIRECT_URI,
       responseType: 'token id_token',
       scope: 'openid profile read:exercises'
     });
