@@ -11,3 +11,15 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
 }
+
+.displayCard {
+  width: 50%;
+}
+
+
+@media only screen and (max-width: 768px) {
+  /* For mobile phones: */
+  .displayCard {
+    width: 100%;
+  }
+}

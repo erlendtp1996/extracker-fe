@@ -3,10 +3,6 @@ import {Link} from 'react-router-dom';
 import axios from 'axios';
 import auth0Client from '../Auth';
 
-const cardStyle = {
-  width: '50%'
-}
-
 var name = '';
 var description = '';
 
@@ -74,8 +70,8 @@ class Exercises extends Component {
     }
     // set loading screen
     await axios.post('https://extracker-api.herokuapp.com/api/exercises', {
-      name: description,
-      description: name,
+      name: name,
+      description: description,
       userId: userId
     }, {
       headers: headers
@@ -91,30 +87,7 @@ class Exercises extends Component {
         { auth0Client.isAuthenticated()
           &&
           <div className="row">
-            <div className="card" style={cardStyle}>
-              <div className="card-body">
-                <h5 className="card-title">Exercises</h5>
-                <table className="table">
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th>Description</th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                  {this.state.exercises && this.state.exercises.map(exercise => (
-                    <tr>
-                      <td><Link to={'/exercises/' + exercise.exerciseId}>{exercise.name}</Link></td>
-                      <td>{exercise.description}</td>
-                      <td><button onClick={() => this.handleDelete(exercise.exerciseId)}>Delete</button></td>
-                    </tr>
-                  ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-            <div className="card" style={cardStyle}>
+            <div className="card" className="displayCard">
               <div className="card-body">
                 <h5 className="card-title">Add Exercise</h5>
                 <form onSubmit={this.handleSubmit} className="form-group">
@@ -136,6 +109,29 @@ class Exercises extends Component {
                   </div>
                   <input type="submit" value="Submit" />
                 </form>
+              </div>
+            </div>
+            <div className="card" className="displayCard">
+              <div className="card-body">
+                <h5 className="card-title">Exercises</h5>
+                <table className="table">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Description</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                  {this.state.exercises && this.state.exercises.map(exercise => (
+                    <tr>
+                      <td><Link to={'/exercises/' + exercise.exerciseId}>{exercise.name}</Link></td>
+                      <td>{exercise.description}</td>
+                      <td><button onClick={() => this.handleDelete(exercise.exerciseId)}>Delete</button></td>
+                    </tr>
+                  ))}
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>

@@ -3,10 +3,7 @@ import {Link} from 'react-router-dom';
 import axios from 'axios';
 import auth0Client from '../Auth';
 import Moment from 'react-moment';
-
-const cardStyle = {
-  width: '50%'
-}
+import moment from 'moment';
 
 var weight = null;
 var sets = null;
@@ -66,7 +63,7 @@ class Routine extends Component {
     rest = event.target.value;
   }
   handleDate(event) {
-    date = event.target.value;
+    date = moment.utc(event.target.value).startOf('day');
   }
   handleNotes(event) {
     notes = event.target.value;
@@ -78,6 +75,8 @@ class Routine extends Component {
       'Authorization': `Bearer ${auth0Client.getAccessToken()}`,
       crossDomain: true
     }
+
+    console.log(date);
 
     await axios.post('https://extracker-api.herokuapp.com/api/routines', {
       exerciseId: this.state.exerciseId,
@@ -91,7 +90,9 @@ class Routine extends Component {
       headers: headers
     });
 
-    var routines = await axios.get('https://extracker-api.herokuapp.com/api/routines?exerciseId=' + this.state.exerciseId, { headers: headers })
+    var routines = await axios.get('https://extracker-api.herokuapp.com/api/routines?exerciseId=' + this.state.exerciseId, { headers: headers });
+
+    console.log(routines);
     this.setState({ routines: routines.data });
   }
 
@@ -121,40 +122,7 @@ class Routine extends Component {
         { !auth0Client.isAuthenticated() && <div className="row"><p>Please sign in to add/view routines.</p></div> }
         { auth0Client.isAuthenticated() &&
           <div className="row">
-            <div className="card" style={cardStyle}>
-              <div className="card-body">
-                <h5 className="card-title">Routines</h5>
-                <table className="table">
-                  <thead>
-                    <tr>
-                      <th>Date</th>
-                      <th>Weight (lbs)</th>
-                      <th>Sets</th>
-                      <th>Reps</th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                  {this.state.routines && this.state.routines.map(routine => (
-                    <tr>
-                      <td>
-                        { routine.date ?
-                        <Moment format="MM/DD">
-                            {routine.date}
-                        </Moment>
-                          : "--"}
-                      </td>
-                      <td>{routine.weight ? routine.weight : "--"}</td>
-                      <td>{routine.setsPerformed ? routine.setsPerformed : "--"}</td>
-                      <td>{routine.repsPerformed}</td>
-                      <td><button onClick={() => this.handleDelete(routine.routineId)}>Delete</button></td>
-                    </tr>
-                  ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-            <div className="card" style={cardStyle}>
+            <div className="card" className="displayCard">
               <div className="card-body">
                 <h5 className="card-title">Add Routines</h5>
                 <form onSubmit={this.handleSubmit} className="form-group">
@@ -206,6 +174,39 @@ class Routine extends Component {
                   </div>
                   <input type="submit" value="Submit" />
                 </form>
+              </div>
+            </div>
+            <div className="card" className="displayCard">
+              <div className="card-body">
+                <h5 className="card-title">Routines</h5>
+                <table className="table">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Weight (lbs)</th>
+                      <th>Sets</th>
+                      <th>Reps</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                  {this.state.routines && this.state.routines.map(routine => (
+                    <tr>
+                      <td>
+                        { routine.date ?
+                        <Moment format="MM/DD" add={{ days: 1 }}>
+                            {routine.date}
+                        </Moment>
+                          : "--"}
+                      </td>
+                      <td>{routine.weight ? routine.weight : "--"}</td>
+                      <td>{routine.setsPerformed ? routine.setsPerformed : "--"}</td>
+                      <td>{routine.repsPerformed}</td>
+                      <td><button onClick={() => this.handleDelete(routine.routineId)}>Delete</button></td>
+                    </tr>
+                  ))}
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
