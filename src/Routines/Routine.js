@@ -90,6 +90,13 @@ class Routine extends Component {
       headers: headers
     });
 
+    weight = '';
+    sets = '';
+    reps = '';
+    rest = '';
+    date = '';
+    notes = '';
+
     var routines = await axios.get('https://extracker-api.herokuapp.com/api/routines?exerciseId=' + this.state.exerciseId, { headers: headers });
 
     console.log(routines);
