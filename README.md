@@ -1,4 +1,4 @@
-## ExTracker
+## [ExTracker](https://extracker-frontend.herokuapp.com/)
 
 This is a front end [React](https://github.com/facebook/create-react-app) application is designed to log exercises and routines that one may perform ( at the gym, after work, etc.). By integrating [Auth0](https://auth0.com/) different users are able to submit exercises and routines to a Spring api. 
 
@@ -17,6 +17,8 @@ Routines: {<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;date [Date],<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;notes [String],<br/>
 }
+
+You can see the application live at https://extracker-frontend.herokuapp.com/.
 
 ## Launching application
 
