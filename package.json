@@ -14,7 +14,8 @@
     "react-moment": "^0.9.2",
     "react-router": "^5.0.0",
     "react-router-dom": "^5.0.0",
-    "react-scripts": "3.0.1"
+    "react-scripts": "3.0.1",
+    "react-spinners": "^0.5.8"
   },
   "scripts": {
     "start": "react-scripts start",

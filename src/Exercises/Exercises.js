@@ -1,10 +1,17 @@
-import React, {Component} from 'react';
-import {Link} from 'react-router-dom';
+import React, { Component } from 'react';
+import { Link } from 'react-router-dom';
+import { SyncLoader } from 'react-spinners';
 import axios from 'axios';
 import auth0Client from '../Auth';
 
 var name = '';
 var description = '';
+const loadingDiv = {
+  padding: '100px'
+}
+const loadingCss = {
+  margin: 'auto'
+}
 
 class Exercises extends Component {
   constructor(props) {
@@ -12,6 +19,7 @@ class Exercises extends Component {
     this.state = {
       exercises: [],
       user_id: auth0Client.isAuthenticated() ? auth0Client.getProfile().sub.split('|')[1] : null,
+      loading: true
     };
 
     this.handleName = this.handleName.bind(this);
@@ -31,7 +39,7 @@ class Exercises extends Component {
             crossDomain: true
           }
         });
-        this.setState({ exercises: exercises.data });
+        this.setState({ exercises: exercises.data, loading: false });
       } catch (exception) {
         console.log(exception);
       }
@@ -53,12 +61,14 @@ class Exercises extends Component {
       crossDomain: true
     }
 
+    this.setState({ loading: true });
+
     await axios.delete('https://extracker-api.herokuapp.com/api/exercises/' + id, {}, {
       headers: headers
     });
 
     var exercises = await axios.get('https://extracker-api.herokuapp.com/api/exercises?userId=' + userId, { headers: headers });
-    this.setState({ exercises: exercises.data });
+    this.setState({ exercises: exercises.data, loading: false  });
   }
 
   async handleSubmit(event) {
@@ -68,6 +78,8 @@ class Exercises extends Component {
       'Authorization': `Bearer ${auth0Client.getAccessToken()}`,
       crossDomain: true
     }
+
+    this.setState({ loading: true });
     // set loading screen
     await axios.post('https://extracker-api.herokuapp.com/api/exercises', {
       name: name,
@@ -77,14 +89,26 @@ class Exercises extends Component {
       headers: headers
     });
     var exercises = await axios.get('https://extracker-api.herokuapp.com/api/exercises?userId=' + userId, { headers: headers });
-    this.setState({ exercises: exercises.data });
+    this.setState({ exercises: exercises.data, loading: false  });
   }
 
   render() {
     return (
       <div className="container">
         { !auth0Client.isAuthenticated() && <div className="row"><p>Please sign in to add/view exercises.</p></div> }
-        { auth0Client.isAuthenticated()
+        {
+          (auth0Client.isAuthenticated() && this.state.loading) &&
+          <div className="row" style={loadingDiv}>
+            <SyncLoader
+              css={loadingCss}
+              sizeUnit={"px"}
+              size={10}
+              color={'#2C3E50'}
+              loading={this.state.loading}
+            />
+          </div>
+        }
+        { (auth0Client.isAuthenticated() && !this.state.loading)
           &&
           <div className="row">
             <div className="card" className="displayCard">
