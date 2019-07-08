@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import {Link} from 'react-router-dom';
+import { SyncLoader } from 'react-spinners';
 import axios from 'axios';
 import auth0Client from '../Auth';
 import Moment from 'react-moment';
@@ -11,6 +12,12 @@ var reps = null;
 var rest = null;
 var date = null;
 var notes = null;
+const loadingDiv = {
+  padding: '100px'
+}
+const loadingCss = {
+  margin: 'auto'
+}
 
 class Routine extends Component {
   constructor(props) {
@@ -19,6 +26,7 @@ class Routine extends Component {
       exerciseId: props.match.params.id,
       routines: [],
       user_id: auth0Client.isAuthenticated() ? auth0Client.getProfile().sub.split('|')[1] : null,
+      loading: true
     };
 
     this.handleWeight = this.handleWeight.bind(this);
@@ -43,7 +51,7 @@ class Routine extends Component {
           }
         });
         console.log(routines);
-        this.setState({ routines: routines.data });
+        this.setState({ routines: routines.data, loading: false });
       } catch (exception) {
         console.log(exception);
       }
@@ -76,7 +84,7 @@ class Routine extends Component {
       crossDomain: true
     }
 
-    console.log(date);
+    this.setState({ loading: true });
 
     await axios.post('https://extracker-api.herokuapp.com/api/routines', {
       exerciseId: this.state.exerciseId,
@@ -98,9 +106,7 @@ class Routine extends Component {
     notes = '';
 
     var routines = await axios.get('https://extracker-api.herokuapp.com/api/routines?exerciseId=' + this.state.exerciseId, { headers: headers });
-
-    console.log(routines);
-    this.setState({ routines: routines.data });
+    this.setState({ routines: routines.data, loading: false });
   }
 
   async handleDelete(id) {
@@ -109,6 +115,8 @@ class Routine extends Component {
       'Authorization': `Bearer ${auth0Client.getAccessToken()}`,
       crossDomain: true
     }
+
+    this.setState({ loading: true });
 
     await axios.delete('https://extracker-api.herokuapp.com/api/routines/' + id, {}, {
       headers: headers
@@ -120,14 +128,26 @@ class Routine extends Component {
         crossDomain: true
       }
     });
-    this.setState({ routines: routines.data });
+    this.setState({ routines: routines.data, loading: false });
   }
 
   render() {
     return (
       <div className="container">
         { !auth0Client.isAuthenticated() && <div className="row"><p>Please sign in to add/view routines.</p></div> }
-        { auth0Client.isAuthenticated() &&
+        {
+          (auth0Client.isAuthenticated() && this.state.loading) &&
+          <div className="row" style={loadingDiv}>
+            <SyncLoader
+              css={loadingCss}
+              sizeUnit={"px"}
+              size={10}
+              color={'#2C3E50'}
+              loading={this.state.loading}
+            />
+          </div>
+        }
+        { (auth0Client.isAuthenticated() && !this.state.loading) &&
           <div className="row">
             <div className="card" className="displayCard">
               <div className="card-body">
