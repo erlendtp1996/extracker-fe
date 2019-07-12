@@ -99,7 +99,14 @@ class Exercises extends Component {
 
     await axios.post(url, postExercise, { headers: headers });
     var exercises = await axios.get(API_DOMAIN + '/api/exercises?userId=' + userId, { headers: headers });
-    this.setState({ exercises: exercises.data, loading: false, updateable: false });
+    this.setState({
+      exercises: exercises.data,
+      loading: false,
+      updateable: false,
+      exerciseName: '',
+      exerciseDescription: '',
+      exerciseId: ''
+    });
   }
 
   async handleUpdate(event, exercise) {
