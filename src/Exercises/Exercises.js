@@ -4,8 +4,6 @@ import { SyncLoader } from 'react-spinners';
 import axios from 'axios';
 import auth0Client from '../Auth';
 
-var name = '';
-var description = '';
 const loadingDiv = {
   padding: '100px'
 }
@@ -13,19 +11,26 @@ const loadingCss = {
   margin: 'auto'
 }
 
+const API_DOMAIN = process.env.REACT_APP_REDIRECT_URI;
+
 class Exercises extends Component {
   constructor(props) {
     super(props);
     this.state = {
       exercises: [],
       user_id: auth0Client.isAuthenticated() ? auth0Client.getProfile().sub.split('|')[1] : null,
-      loading: true
+      loading: true,
+      updateable: false,
+      exerciseName: '',
+      exerciseDescription: '',
+      exerciseId: ''
     };
 
     this.handleName = this.handleName.bind(this);
     this.handleDescription = this.handleDescription.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleDelete = this.handleDelete.bind(this);
+    this.handleUpdate = this.handleUpdate.bind(this);
   }
 
   async componentDidMount() {
@@ -33,13 +38,13 @@ class Exercises extends Component {
       const userId = this.state.user_id;
       var exercises = [];
       try {
-        exercises = await axios.get('https://extracker-api.herokuapp.com/api/exercises?userId=' + userId, {
+        exercises = await axios.get(API_DOMAIN + '/api/exercises?userId=' + userId, {
           headers: {
             'Authorization': `Bearer ${auth0Client.getAccessToken()}`,
             crossDomain: true
           }
         });
-        this.setState({ exercises: exercises.data, loading: false });
+        this.setState({ exercises: exercises.data, loading: false, updateable: false });
       } catch (exception) {
         console.log(exception);
       }
@@ -47,11 +52,11 @@ class Exercises extends Component {
   }
 
   handleName(event) {
-    name = event.target.value;
+    this.setState({exerciseName: event.target.value});
   }
 
   handleDescription(event) {
-    description = event.target.value;
+    this.setState({exerciseDescription: event.target.value});
   }
 
   async handleDelete(id) {
@@ -63,12 +68,12 @@ class Exercises extends Component {
 
     this.setState({ loading: true });
 
-    await axios.delete('https://extracker-api.herokuapp.com/api/exercises/' + id, {}, {
+    await axios.delete(API_DOMAIN + '/api/exercises/' + id, {}, {
       headers: headers
     });
 
-    var exercises = await axios.get('https://extracker-api.herokuapp.com/api/exercises?userId=' + userId, { headers: headers });
-    this.setState({ exercises: exercises.data, loading: false  });
+    var exercises = await axios.get(API_DOMAIN + '/api/exercises?userId=' + userId, { headers: headers });
+    this.setState({ exercises: exercises.data, loading: false, updateable: false  });
   }
 
   async handleSubmit(event) {
@@ -78,18 +83,32 @@ class Exercises extends Component {
       'Authorization': `Bearer ${auth0Client.getAccessToken()}`,
       crossDomain: true
     }
+    var postExercise = {
+      name: this.state.exerciseName,
+      description: this.state.exerciseDescription,
+      userId: userId,
+    }
+
+    if (this.state.updateable) {
+      postExercise.exerciseId = this.state.exerciseId;
+    }
+
+    const url = this.state.updateable ? API_DOMAIN + '/api/exercises/' + this.state.exerciseId : API_DOMAIN + '/api/exercises'
 
     this.setState({ loading: true });
-    // set loading screen
-    await axios.post('https://extracker-api.herokuapp.com/api/exercises', {
-      name: name,
-      description: description,
-      userId: userId
-    }, {
-      headers: headers
-    });
-    var exercises = await axios.get('https://extracker-api.herokuapp.com/api/exercises?userId=' + userId, { headers: headers });
-    this.setState({ exercises: exercises.data, loading: false  });
+
+    await axios.post(url, postExercise, { headers: headers });
+    var exercises = await axios.get(API_DOMAIN + '/api/exercises?userId=' + userId, { headers: headers });
+    this.setState({ exercises: exercises.data, loading: false, updateable: false });
+  }
+
+  async handleUpdate(event, exercise) {
+    this.setState({
+      updateable: event.target.checked,
+      exerciseName: exercise.name || '',
+      exerciseDescription: exercise.description || '',
+      exerciseId: exercise.exerciseId
+    })
   }
 
   render() {
@@ -119,7 +138,7 @@ class Exercises extends Component {
                     <div className="col">
                       <label>
                         Exercise Name:
-                        <input type="text" onChange={this.handleName} className="form-control"/>
+                        <input type="text" onChange={this.handleName} className="form-control" value={this.state.exerciseName}/>
                       </label>
                     </div>
                   </div>
@@ -127,11 +146,11 @@ class Exercises extends Component {
                     <div className="col">
                       <label>
                         Exercise Description:
-                        <textarea type="text" onChange={this.handleDescription} className="form-control"/>
+                        <textarea onChange={this.handleDescription} className="form-control" value={this.state.exerciseDescription}/>
                       </label>
                     </div>
                   </div>
-                  <input type="submit" value="Submit" />
+                  <input type="submit" value={this.state.updateable ? "Update" : "Submit"} />
                 </form>
               </div>
             </div>
@@ -141,6 +160,7 @@ class Exercises extends Component {
                 <table className="table">
                   <thead>
                     <tr>
+                      <th></th>
                       <th>Name</th>
                       <th>Description</th>
                       <th></th>
@@ -148,7 +168,10 @@ class Exercises extends Component {
                   </thead>
                   <tbody>
                   {this.state.exercises && this.state.exercises.map(exercise => (
-                    <tr>
+                    <tr key={exercise.exerciseId} className="clickable-row">
+                      <td>
+                        <input name="updateable" type="radio" onChange={(event) => this.handleUpdate(event, exercise)} checked={(this.state.updateable && this.state.exerciseId === exercise.exerciseId)} />
+                      </td>
                       <td><Link to={'/exercises/' + exercise.exerciseId}>{exercise.name}</Link></td>
                       <td>{exercise.description}</td>
                       <td><button onClick={() => this.handleDelete(exercise.exerciseId)}>Delete</button></td>
