@@ -11,7 +11,7 @@ const loadingCss = {
   margin: 'auto'
 }
 
-const API_DOMAIN = process.env.REACT_APP_REDIRECT_URI;
+const API_DOMAIN = process.env.REACT_APP_API_DOMAIN;
 
 class Exercises extends Component {
   constructor(props) {
