@@ -75,7 +75,7 @@ class Routine extends Component {
     this.setState({ rest: event.target.value });
   }
   handleDate(event) {
-    this.setState({ sets: moment.utc(event.target.value).startOf('day') });
+    this.setState({ date: moment.utc(event.target.value).startOf('day') });
   }
   handleNotes(event) {
     this.setState({ notes: event.target.value });
