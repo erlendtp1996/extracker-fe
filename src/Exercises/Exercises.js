@@ -92,10 +92,8 @@ class Exercises extends Component {
     if (this.state.updateable) {
       postExercise.exerciseId = this.state.exerciseId;
     }
-
+this.setState({ loading: true });
     const url = this.state.updateable ? API_DOMAIN + '/api/exercises/' + this.state.exerciseId : API_DOMAIN + '/api/exercises'
-
-    this.setState({ loading: true });
 
     await axios.post(url, postExercise, { headers: headers });
     var exercises = await axios.get(API_DOMAIN + '/api/exercises?userId=' + userId, { headers: headers });
@@ -109,7 +107,7 @@ class Exercises extends Component {
     });
   }
 
-  async handleUpdate(event, exercise) {
+  handleUpdate(event, exercise) {
     this.setState({
       updateable: event.target.checked,
       exerciseName: exercise.name || '',

@@ -6,18 +6,14 @@ import auth0Client from '../Auth';
 import Moment from 'react-moment';
 import moment from 'moment';
 
-var weight = null;
-var sets = null;
-var reps = null;
-var rest = null;
-var date = null;
-var notes = null;
 const loadingDiv = {
   padding: '100px'
 }
 const loadingCss = {
   margin: 'auto'
 }
+
+const API_DOMAIN = process.env.REACT_APP_API_DOMAIN;
 
 class Routine extends Component {
   constructor(props) {
@@ -26,7 +22,15 @@ class Routine extends Component {
       exerciseId: props.match.params.id,
       routines: [],
       user_id: auth0Client.isAuthenticated() ? auth0Client.getProfile().sub.split('|')[1] : null,
-      loading: true
+      loading: true,
+      updateable: false,
+      routineId: '',
+      weight: '',
+      sets: '',
+      reps: '',
+      rest: '',
+      date: '',
+      notes: ''
     };
 
     this.handleWeight = this.handleWeight.bind(this);
@@ -37,6 +41,7 @@ class Routine extends Component {
     this.handleNotes = this.handleNotes.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleDelete = this.handleDelete.bind(this);
+    this.handleUpdate = this.handleUpdate.bind(this);
   }
 
   async componentDidMount() {
@@ -44,14 +49,13 @@ class Routine extends Component {
       const exerciseId = this.state.exerciseId;
       var routines = [];
       try {
-        routines = await axios.get('https://extracker-api.herokuapp.com/api/routines?exerciseId=' + exerciseId, {
+        routines = await axios.get(API_DOMAIN + '/api/routines?exerciseId=' + exerciseId, {
           headers: {
             'Authorization': `Bearer ${auth0Client.getAccessToken()}`,
             crossDomain: true
           }
         });
-        console.log(routines);
-        this.setState({ routines: routines.data, loading: false });
+        this.setState({ routines: routines.data, loading: false, updateable: false });
       } catch (exception) {
         console.log(exception);
       }
@@ -59,22 +63,22 @@ class Routine extends Component {
   }
 
   handleWeight(event) {
-    weight = event.target.value;
+    this.setState({ weight: event.target.value });
   }
   handleSets(event) {
-    sets = event.target.value;
+    this.setState({ sets: event.target.value });
   }
   handleReps(event) {
-    reps = event.target.value;
+    this.setState({ reps: event.target.value });
   }
   handleRest(event) {
-    rest = event.target.value;
+    this.setState({ rest: event.target.value });
   }
   handleDate(event) {
-    date = moment.utc(event.target.value).startOf('day');
+    this.setState({ sets: moment.utc(event.target.value).startOf('day') });
   }
   handleNotes(event) {
-    notes = event.target.value;
+    this.setState({ notes: event.target.value });
   }
   async handleSubmit(event) {
     event.preventDefault();
@@ -84,29 +88,37 @@ class Routine extends Component {
       crossDomain: true
     }
 
-    this.setState({ loading: true });
-
-    await axios.post('https://extracker-api.herokuapp.com/api/routines', {
+    var postRoutine = {
       exerciseId: this.state.exerciseId,
-      weight: weight,
-      setsPerformed: sets,
-      repsPerformed: reps,
-      restInterval: rest,
-      date: date,
-      notes: notes
-    }, {
-      headers: headers
+      weight: this.state.weight,
+      setsPerformed: this.state.sets,
+      repsPerformed: this.state.reps,
+      restInterval: this.state.rest,
+      date: this.state.date,
+      notes: this.state.notes
+    }
+
+    if (this.state.updateable) {
+      postRoutine.routineId = this.state.routineId;
+    }
+
+    this.setState({ loading: true });
+    const url = this.state.updateable ? API_DOMAIN + '/api/routines/' + this.state.routineId : API_DOMAIN + '/api/routines';
+
+    await axios.post(url, postRoutine, { headers: headers });
+    var routines = await axios.get(API_DOMAIN + '/api/routines?exerciseId=' + this.state.exerciseId, { headers: headers });
+    this.setState({
+      routines: routines.data,
+      loading: false,
+      updateable: false,
+      routineId: '',
+      weight: '',
+      sets: '',
+      reps: '',
+      rest: '',
+      date: '',
+      notes: ''
     });
-
-    weight = '';
-    sets = '';
-    reps = '';
-    rest = '';
-    date = '';
-    notes = '';
-
-    var routines = await axios.get('https://extracker-api.herokuapp.com/api/routines?exerciseId=' + this.state.exerciseId, { headers: headers });
-    this.setState({ routines: routines.data, loading: false });
   }
 
   async handleDelete(id) {
@@ -118,17 +130,22 @@ class Routine extends Component {
 
     this.setState({ loading: true });
 
-    await axios.delete('https://extracker-api.herokuapp.com/api/routines/' + id, {}, {
-      headers: headers
-    });
+    await axios.delete(API_DOMAIN + '/api/routines/' + id, {}, { headers: headers });
+    var routines = await axios.get(API_DOMAIN + '/api/routines?exerciseId=' + this.state.exerciseId, { headers: headers });
+    this.setState({ routines: routines.data, loading: false, updateable: false });
+  }
 
-    var routines = await axios.get('https://extracker-api.herokuapp.com/api/routines?exerciseId=' + this.state.exerciseId, {
-      headers: {
-        'Authorization': `Bearer ${auth0Client.getAccessToken()}`,
-        crossDomain: true
-      }
-    });
-    this.setState({ routines: routines.data, loading: false });
+  handleUpdate(event, routine) {
+    this.setState({
+      updateable: event.target.checked,
+      routineId: routine.routineId || '',
+      weight: routine.weight || '',
+      sets: routine.setsPerformed || '',
+      reps: routine.repsPerformed || '',
+      rest: routine.restInterval || '',
+      date: moment.utc(routine.date).format('YYYY-MM-DD') || '',
+      notes: routine.notes || ''
+    })
   }
 
   render() {
@@ -157,13 +174,13 @@ class Routine extends Component {
                     <div className="col">
                       <label>
                         Weight (lbs):
-                        <input type="number" onChange={this.handleWeight} className="form-control"/>
+                        <input type="number" onChange={this.handleWeight} className="form-control" value={this.state.weight}/>
                       </label>
                     </div>
                     <div className="col">
                       <label>
                         Sets:
-                        <input type="number" onChange={this.handleSets} className="form-control"/>
+                        <input type="number" onChange={this.handleSets} className="form-control" value={this.state.sets}/>
                       </label>
                     </div>
                   </div>
@@ -171,13 +188,13 @@ class Routine extends Component {
                     <div className="col">
                       <label>
                         Reps:
-                        <input type="number" onChange={this.handleReps} className="form-control"/>
+                        <input type="number" onChange={this.handleReps} className="form-control" value={this.state.reps}/>
                       </label>
                     </div>
                     <div className="col">
                       <label>
                         Rest Interval:
-                        <input type="text" onChange={this.handleRest} className="form-control"/>
+                        <input type="text" onChange={this.handleRest} className="form-control" value={this.state.rest}/>
                       </label>
                     </div>
                   </div>
@@ -185,7 +202,7 @@ class Routine extends Component {
                     <div className="col">
                       <label>
                         Date:
-                        <input type="date" onChange={this.handleDate} className="form-control"/>
+                        <input type="date" onChange={this.handleDate} className="form-control" value={this.state.date}/>
                       </label>
                     </div>
                   </div>
@@ -194,12 +211,12 @@ class Routine extends Component {
                       <div className="col">
                         <label>
                           Additional Notes:
-                          <textarea onChange={this.handleNotes} className="form-control" />
+                          <textarea onChange={this.handleNotes} className="form-control" value={this.state.notes}/>
                         </label>
                       </div>
                     </div>
                   </div>
-                  <input type="submit" value="Submit" />
+                  <input type="submit" value={this.state.updateable ? "Update" : "Submit"} />
                 </form>
               </div>
             </div>
@@ -209,6 +226,7 @@ class Routine extends Component {
                 <table className="table">
                   <thead>
                     <tr>
+                      <th></th>
                       <th>Date</th>
                       <th>Weight (lbs)</th>
                       <th>Sets</th>
@@ -218,7 +236,10 @@ class Routine extends Component {
                   </thead>
                   <tbody>
                   {this.state.routines && this.state.routines.map(routine => (
-                    <tr>
+                    <tr key={routine.routineId}>
+                      <td>
+                        <input name="updateable" type="radio" onChange={(event) => this.handleUpdate(event, routine)} checked={(this.state.updateable && this.state.routineId === routine.routineId)} />
+                      </td>
                       <td>
                         { routine.date ?
                         <Moment format="MM/DD" add={{ days: 1 }}>
