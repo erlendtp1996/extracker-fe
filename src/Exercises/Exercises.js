@@ -177,7 +177,11 @@ this.setState({ loading: true });
                       <td>
                         <input name="updateable" type="radio" onChange={(event) => this.handleUpdate(event, exercise)} checked={(this.state.updateable && this.state.exerciseId === exercise.exerciseId)} />
                       </td>
-                      <td><Link to={'/exercises/' + exercise.exerciseId}>{exercise.name}</Link></td>
+                      <td><Link to={{pathname: '/exercises/' + exercise.exerciseId,
+                            state: {
+                              exerciseName: exercise.name,
+                              exerciseDescription: exercise.description
+                            }}}>{exercise.name}</Link></td>
                       <td>{exercise.description}</td>
                       <td><button onClick={() => this.handleDelete(exercise.exerciseId)}>Delete</button></td>
                     </tr>

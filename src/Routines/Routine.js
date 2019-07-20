@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import {Link} from 'react-router-dom';
+import { TiArrowBackOutline } from 'react-icons/ti'
 import { SyncLoader } from 'react-spinners';
 import axios from 'axios';
 import auth0Client from '../Auth';
@@ -19,6 +20,8 @@ class Routine extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      exerciseName: props.location.state.exerciseName,
+      exerciseDescription: props.location.state.exerciseDescription,
       exerciseId: props.match.params.id,
       routines: [],
       user_id: auth0Client.isAuthenticated() ? auth0Client.getProfile().sub.split('|')[1] : null,
@@ -166,6 +169,13 @@ class Routine extends Component {
         }
         { (auth0Client.isAuthenticated() && !this.state.loading) &&
           <div className="row">
+            <div className="card" className="jumbotron jumbotron-fluid" style={{width: '100%'}}>
+              <div style={{paddingLeft: '30px'}}>
+                <h4>{this.state.exerciseName}</h4>
+                <p>{this.state.exerciseDescription}</p>
+                <Link to={'/'}><button type="button" className="btn btn-dark" style={{minWidth: '100px'}}><TiArrowBackOutline /></button></Link>
+              </div>
+            </div>
             <div className="card" className="displayCard">
               <div className="card-body">
                 <h5 className="card-title">Add Routines</h5>
