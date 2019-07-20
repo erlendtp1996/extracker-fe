@@ -46,6 +46,7 @@ class Routine extends Component {
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleDelete = this.handleDelete.bind(this);
     this.handleUpdate = this.handleUpdate.bind(this);
+    this.handleClear = this.handleClear.bind(this);
   }
 
   async componentDidMount() {
@@ -152,6 +153,19 @@ class Routine extends Component {
     })
   }
 
+  handleClear() {
+    this.setState({
+      updateable: false,
+      routineId: '',
+      weight: '',
+      sets: '',
+      reps: '',
+      rest: '',
+      date: '',
+      notes: ''
+    })
+  }
+
   render() {
     return (
       <div className="container">
@@ -227,7 +241,10 @@ class Routine extends Component {
                       </div>
                     </div>
                   </div>
-                  <input type="submit" value={this.state.updateable ? "Update" : "Submit"} />
+                  <div className="buttonGroup">
+                    <input type="submit" value={this.state.updateable ? "Update" : "Submit"} />
+                    { this.state.updateable && <button onClick={this.handleClear} >Clear</button>}
+                  </div>
                 </form>
               </div>
             </div>

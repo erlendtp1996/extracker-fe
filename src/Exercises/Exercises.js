@@ -32,6 +32,7 @@ class Exercises extends Component {
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleDelete = this.handleDelete.bind(this);
     this.handleUpdate = this.handleUpdate.bind(this);
+    this.handleClear = this.handleClear.bind(this);
   }
 
   async componentDidMount() {
@@ -93,7 +94,7 @@ class Exercises extends Component {
     if (this.state.updateable) {
       postExercise.exerciseId = this.state.exerciseId;
     }
-this.setState({ loading: true });
+    this.setState({ loading: true });
     const url = this.state.updateable ? API_DOMAIN + '/api/exercises/' + this.state.exerciseId : API_DOMAIN + '/api/exercises'
 
     await axios.post(url, postExercise, { headers: headers });
@@ -115,6 +116,15 @@ this.setState({ loading: true });
       exerciseDescription: exercise.description || '',
       exerciseId: exercise.exerciseId
     })
+  }
+
+  handleClear() {
+    this.setState({
+      updateable: false,
+      exerciseName: '',
+      exerciseDescription: '',
+      exerciseId: ''
+    });
   }
 
   render() {
@@ -156,7 +166,10 @@ this.setState({ loading: true });
                       </label>
                     </div>
                   </div>
-                  <input type="submit" value={this.state.updateable ? "Update" : "Submit"} />
+                  <div className="buttonGroup">
+                    <input type="submit" value={this.state.updateable ? "Update" : "Submit"} />
+                    { this.state.updateable && <button onClick={this.handleClear} >Clear</button>}
+                  </div>
                 </form>
               </div>
             </div>
