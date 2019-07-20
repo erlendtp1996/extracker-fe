@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import Landing from '../common/components/Landing';
 import { Link } from 'react-router-dom';
 import { SyncLoader } from 'react-spinners';
 import axios from 'axios';
@@ -119,7 +120,7 @@ this.setState({ loading: true });
   render() {
     return (
       <div className="container">
-        { !auth0Client.isAuthenticated() && <div className="row"><p>Please sign in to add/view exercises.</p></div> }
+        { !auth0Client.isAuthenticated() && <Landing /> }
         {
           (auth0Client.isAuthenticated() && this.state.loading) &&
           <div className="row" style={loadingDiv}>

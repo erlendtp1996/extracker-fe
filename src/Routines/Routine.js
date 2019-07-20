@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import Landing from '../common/components/Landing';
 import {Link} from 'react-router-dom';
 import { TiArrowBackOutline } from 'react-icons/ti'
 import { SyncLoader } from 'react-spinners';
@@ -154,7 +155,7 @@ class Routine extends Component {
   render() {
     return (
       <div className="container">
-        { !auth0Client.isAuthenticated() && <div className="row"><p>Please sign in to add/view routines.</p></div> }
+        { !auth0Client.isAuthenticated() && <Landing /> }
         {
           (auth0Client.isAuthenticated() && this.state.loading) &&
           <div className="row" style={loadingDiv}>
