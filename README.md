@@ -24,6 +24,7 @@ You can see the application live at https://extracker-frontend.herokuapp.com/.
 Extracker-fe is a simple, fast, and free open source excercise tracking app. Keep track of your excercises and routines quickly, easily, and efficiently.
 
 ## Goals
+Extracker-fe aims to be
 + Free 
 + Open Source 
 + Informative 
