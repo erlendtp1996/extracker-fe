@@ -20,6 +20,23 @@ Routines: {<br/>
 
 You can see the application live at https://extracker-frontend.herokuapp.com/.
 
+## Purpose
+Extracker-fe is a simple, fast, and free open source excercise tracking app. Keep track of your excercises and routines quickly, easily, and efficiently.
+
+## Goals
+Extracker-fe aims to be
++ Free 
++ Open Source 
++ Informative 
++ Efficient 
++ Quick 
++ Simple 
++ Easy To Use
+
+## Features
++ User can create, delete, and modify excercises 
++ User can keep track of dates, weights, reps and sets for each excercise
+
 ## Launching application
 
 In the project directory, you can run:
