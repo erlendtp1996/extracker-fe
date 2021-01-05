@@ -4,7 +4,7 @@
   "private": true,
   "dependencies": {
     "auth0-js": "^9.10.4",
-    "axios": "^0.18.0",
+    "axios": "^0.21.1",
     "dotenv": "^8.0.0",
     "express-jwt": "^5.3.1",
     "jwks-rsa": "^1.5.1",
